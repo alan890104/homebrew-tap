@@ -7,20 +7,20 @@ class Unsee < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-aarch64-apple-darwin.tar.gz"
-      sha256 "e8e3094fd5f3ae98fad56e8cb099ac9ac45a2396d151ba6f6a2506f7cbb49fc9"
+      sha256 "520650dfe064a0bc58dc25c3a940bffde36974a0369bf15abce177d5861b52f4"
     else
       url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-x86_64-apple-darwin.tar.gz"
-      sha256 "cf5b39abe8320d672a587a9c4c21a7ae6a0e6a929ca00269691d3416630e94c6"
+      sha256 "cd2059af84e8d7da4141f7a2c2967a442d2ace23aa7417d909108ba8de9b454f"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "24e0cbbbab14ecb0c5a5c1b69d6d81548e95f77f6a774c7685175e22ffabefab"
+      sha256 "972655f3c874657ee44c9ac37602e9aa16bbcd7583b19334893aa06cf5fb312d"
     else
       url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "6064c7fe0344389e9af2dd0a76d3b3c9d9ddb4a598571a404d8bb23e26998429"
+      sha256 "3cf8fe12fba39215def5602c081c81b191d4dfdec1fe83322ab05c6810489fda"
     end
   end
 
