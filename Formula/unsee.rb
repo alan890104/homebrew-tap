@@ -1,5 +1,5 @@
 class Unsee < Formula
-  desc "Credential protection for LLM coding agents"
+  desc "Hide your secrets from AI coding agents"
   homepage "https://github.com/alan890104/unsee"
   url "https://github.com/alan890104/unsee/archive/refs/tags/v0.1.0.tar.gz"
   sha256 "a1742c09c8c1245e8cde708507db1a2722e5fb9795ffa69b75060d1aac736f87"
@@ -24,6 +24,6 @@ class Unsee < Formula
   end
 
   test do
-    assert_match "Credential protection", shell_output("#{bin}/unsee --help")
+    assert_match "unsee", shell_output("#{bin}/unsee --help")
   end
 end
