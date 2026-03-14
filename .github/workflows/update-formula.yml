@@ -1,0 +1,100 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [update-formula]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 0.0.1, without v prefix)"
+        required: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download checksums
+        run: |
+          curl -fSL "https://github.com/alan890104/unsee/releases/download/v${{ steps.version.outputs.version }}/checksums.txt" \
+            -o checksums.txt
+          cat checksums.txt
+
+      - name: Update formula
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          SHA_AARCH64_MACOS=$(grep 'unsee-aarch64-apple-darwin.tar.gz' checksums.txt | awk '{print $1}')
+          SHA_X86_64_MACOS=$(grep 'unsee-x86_64-apple-darwin.tar.gz' checksums.txt | awk '{print $1}')
+          SHA_AARCH64_LINUX=$(grep 'unsee-aarch64-unknown-linux-gnu.tar.gz' checksums.txt | awk '{print $1}')
+          SHA_X86_64_LINUX=$(grep 'unsee-x86_64-unknown-linux-gnu.tar.gz' checksums.txt | awk '{print $1}')
+
+          cat > Formula/unsee.rb << RUBY
+          class Unsee < Formula
+            desc "Hide your secrets from AI coding agents"
+            homepage "https://github.com/alan890104/unsee"
+            version "${VERSION}"
+            license "MIT"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-aarch64-apple-darwin.tar.gz"
+                sha256 "${SHA_AARCH64_MACOS}"
+              else
+                url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-x86_64-apple-darwin.tar.gz"
+                sha256 "${SHA_X86_64_MACOS}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+                url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-aarch64-unknown-linux-gnu.tar.gz"
+                sha256 "${SHA_AARCH64_LINUX}"
+              else
+                url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-x86_64-unknown-linux-gnu.tar.gz"
+                sha256 "${SHA_X86_64_LINUX}"
+              end
+            end
+
+            def install
+              bin.install "unsee"
+            end
+
+            def caveats
+              <<~EOS
+                To activate protection, run:
+                  unsee install
+
+                To fully uninstall (wrappers + binary):
+                  unsee uninstall
+              EOS
+            end
+
+            test do
+              assert_match "unsee", shell_output("#{bin}/unsee --help")
+            end
+          end
+          RUBY
+
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' Formula/unsee.rb
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/unsee.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update unsee to ${{ steps.version.outputs.version }}"
+          git push
