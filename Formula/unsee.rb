@@ -1,16 +1,31 @@
 class Unsee < Formula
   desc "Hide your secrets from AI coding agents"
   homepage "https://github.com/alan890104/unsee"
-  url "https://github.com/alan890104/unsee/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "a1742c09c8c1245e8cde708507db1a2722e5fb9795ffa69b75060d1aac736f87"
+  version "0.1.0"
   license "MIT"
 
-  head "https://github.com/alan890104/unsee.git", branch: "main"
+  on_macos do
+    if Hardware::CPU.arm?
+      url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-aarch64-apple-darwin.tar.gz"
+      sha256 "PLACEHOLDER"
+    else
+      url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-x86_64-apple-darwin.tar.gz"
+      sha256 "PLACEHOLDER"
+    end
+  end
 
-  depends_on "rust" => :build
+  on_linux do
+    if Hardware::CPU.arm?
+      url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "PLACEHOLDER"
+    else
+      url "https://github.com/alan890104/unsee/releases/download/v#{version}/unsee-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "PLACEHOLDER"
+    end
+  end
 
   def install
-    system "cargo", "install", *std_cargo_args(path: "crates/unsee-cli")
+    bin.install "unsee"
   end
 
   def caveats
@@ -18,7 +33,7 @@ class Unsee < Formula
       To activate protection, run:
         unsee install
 
-      Before uninstalling unsee, remove shell wrappers first:
+      To fully uninstall (wrappers + binary):
         unsee uninstall
     EOS
   end
